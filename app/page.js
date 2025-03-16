@@ -100,8 +100,8 @@
 //   );
 // }
 
-import Login from "./components/login";
+import Loginpage from "./login/page";
 
 export default function Home() {
-  return <Login />;
+  return <Loginpage />;
 }
