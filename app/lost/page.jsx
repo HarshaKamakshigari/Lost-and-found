@@ -8,7 +8,7 @@ export default function LostItems() {
   const [lostItems, setLostItems] = useState([]);
 
   useEffect(() => {
-    // Query to get only items where type is 'lost'
+    
     const q = query(collection(db, "reportedItems"), where("type", "==", "lost"));
 
     const unsubscribe = onSnapshot(
@@ -25,11 +25,11 @@ export default function LostItems() {
       }
     );
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-100 shadow-lg rounded-lg mt-10">
+    <div className="max-w-4xl mx-auto p-6 bg-gray-100 shadow-lg rounded-lg mt-10 mb-10">
       <h1 className="text-2xl font-semibold text-center mb-6 text-black">Lost Items</h1>
 
       {lostItems.length === 0 ? (

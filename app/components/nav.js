@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="bg-gray-00 text-black py-4 px-6 ">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold text-black">
+        <Link href="/home" className="text-xl font-bold text-black">
           Lost & Found
         </Link>
 

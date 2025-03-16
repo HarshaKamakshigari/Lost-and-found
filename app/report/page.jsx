@@ -203,7 +203,7 @@ export default function ReportItem() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-[#F5F5F5] rounded-lg mt-10">
+    <div className="max-w-lg mx-auto p-6 bg-[#F5F5F5] rounded-lg mt-10 mb-10">
       <h1 className="text-2xl font-semibold text-center mb-4 text-gray-800 pb-10">
         Report an Item
       </h1>
