@@ -11,11 +11,14 @@ export default function RootLayout({ children }) {
       <body className="bg-gray-100">
       <Navbar />
         <SessionProvider>{children}</SessionProvider>
-        <Footer />
+        <div className="mt-[200px]">
+          <Footer />
+        </div>
       </body>
     </html>
   );
 }
+
 // export default function RootLayout({ children }) {
 //   return (
 //     <html lang="en">
