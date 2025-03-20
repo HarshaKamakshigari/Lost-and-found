@@ -223,7 +223,7 @@ export default function ReportItem() {
         </div>
 
         <div>
-          <label className="block font-medium text-black pb-5 pt-5">Description</label>
+          <label className="block font-medium text-black pb-5 pt-5">Description of the item</label>
           <textarea
             name="description"
             placeholder="Describe the item"
