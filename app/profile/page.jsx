@@ -36,9 +36,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="bg-white text-white min-h-screen flex flex-col items-center justify-center p-6">
       {/* Profile Card */}
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
+      <div className="bg-gray-600 p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
         <img
           src={user?.photoURL || "/default-avatar.png"} // Default avatar if null
           alt="Profile Picture"
