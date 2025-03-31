@@ -319,7 +319,7 @@
 
 import { useState } from "react";
 import { db } from "../firebase"; // Firebase Firestore
-import { collection, addDoc, updateDoc, serverTimestamp, doc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { supabase } from "../supabase"; // Supabase client import
 
 export default function ReportItem() {
@@ -335,7 +335,8 @@ export default function ReportItem() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [uploadedUrl, setUploadedUrl] = useState(""); // Store the uploaded image URL
+  const [imageUrl, setImageUrl] = useState(""); // Store the uploaded image URL
+  const [errorMessage, setErrorMessage] = useState(""); // For error handling
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -354,25 +355,22 @@ export default function ReportItem() {
   const uploadImageToSupabase = async (file) => {
     if (!file) return null;
 
-    const fileName = `${Date.now()}_${file.name}`;
+    const fileName = `${Date.now()}_${file.name}`; // FIXED TEMPLATE LITERAL
     try {
       // Upload image to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from("lost-and-found-images")
-        .upload(fileName, file);
+      const { error } = await supabase.storage.from("images").upload(fileName, file);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error uploading to Supabase:", error);
+        return null;
+      }
 
       // Get the public URL of the uploaded image
-      const { publicURL, error: urlError } = supabase.storage
-        .from("lost-and-found-images")
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from("images").getPublicUrl(fileName);
 
-      if (urlError) throw urlError;
-
-      return publicURL;
+      return data.publicUrl; // FIXED: Correctly return the URL
     } catch (error) {
-      console.error("Error uploading to Supabase:", error);
+      console.error("Unexpected error during image upload:", error);
       return null;
     }
   };
@@ -381,16 +379,29 @@ export default function ReportItem() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate required fields
     if (!formData.name || !formData.description || !formData.location || !formData.reporterName || !formData.reporterEmail) {
       alert("Please fill in all required fields.");
       return;
     }
 
     setLoading(true);
+    let uploadedImageUrl = "";
 
     try {
-      // Create a new document in Firestore (without image URL initially)
-      const docRef = await addDoc(collection(db, "reportedItems"), {
+      // If there's an image, upload it to Supabase and get the URL
+      if (formData.image) {
+        uploadedImageUrl = await uploadImageToSupabase(formData.image);
+        if (!uploadedImageUrl) {
+          setErrorMessage("Failed to upload image");
+          setLoading(false);
+          return;
+        }
+        setImageUrl(uploadedImageUrl); // Set the image URL after successful upload
+      }
+
+      // Create a new document in Firestore with the uploaded image URL
+      await addDoc(collection(db, "reportedItems"), {
         name: formData.name,
         description: formData.description,
         location: formData.location,
@@ -398,22 +409,12 @@ export default function ReportItem() {
         reporterName: formData.reporterName,
         reporterEmail: formData.reporterEmail,
         reporterPhone: formData.reporterPhone || "", // Optional field
-        imageUrl: "", // Placeholder for now
+        imageUrl: uploadedImageUrl, // Store image URL if uploaded
         timestamp: serverTimestamp(),
       });
 
-      let imageUrl = "";
-
-      // If there's an image, upload it to Supabase and get the URL
-      if (formData.image) {
-        imageUrl = await uploadImageToSupabase(formData.image);
-        if (imageUrl) {
-          // Update Firestore document with the uploaded image URL
-          await updateDoc(doc(db, "reportedItems", docRef.id), { imageUrl });
-        }
-      }
-
       alert("Item reported successfully!");
+      // Reset form data after successful submission
       setFormData({
         name: "",
         description: "",
@@ -424,6 +425,7 @@ export default function ReportItem() {
         reporterEmail: "",
         reporterPhone: "",
       });
+      setImageUrl(""); // Reset uploaded image
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit. Try again.");
@@ -494,6 +496,7 @@ export default function ReportItem() {
           className="w-full p-2 border rounded-md"
         />
 
+        {/* Fixed ClassNames for Buttons */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -527,14 +530,15 @@ export default function ReportItem() {
           {loading ? "Submitting..." : "Submit"}
         </button>
 
-        {uploadedUrl && (
+        {imageUrl && (
           <div className="mt-4">
-            <p className="text-sm text-gray-600">Uploaded Image:</p>
-            <img src={uploadedUrl} alt="Uploaded preview" className="w-full h-auto mt-2 rounded-md" />
+            <p>Uploaded Image:</p>
+            <img src={imageUrl} alt="Uploaded preview" className="w-full h-auto mt-2 rounded-md" />
           </div>
         )}
+
+        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
       </form>
     </div>
   );
 }
-

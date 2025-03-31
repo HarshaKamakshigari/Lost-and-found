@@ -118,7 +118,8 @@ const UploadPage = () => {
     }
 
     const imageUrls = data.map((item) => {
-      return supabase.storage.from("images").getPublicUrl(item.name).publicUrl;
+      const { data: publicUrlData } = supabase.storage.from("images").getPublicUrl(item.name);
+      return { url: publicUrlData.publicUrl, name: item.name };
     });
 
     setImageList(imageUrls); // Store the fetched images URLs in state
@@ -144,6 +145,7 @@ const UploadPage = () => {
         <div className="mt-4">
           <p>Uploaded Image:</p>
           <img src={imageUrl} alt="Uploaded" className="mt-2 w-48" />
+          <p className="text-sm mt-2 break-all">{imageUrl}</p> {/* Show Public URL */}
         </div>
       )}
 
@@ -151,8 +153,11 @@ const UploadPage = () => {
         <h2 className="text-xl font-semibold mb-2">Previously Uploaded Images</h2>
         <div className="grid grid-cols-3 gap-4">
           {imageList.length > 0 ? (
-            imageList.map((url, index) => (
-              <img key={index} src={url} alt={`Uploaded ${index}`} className="w-24 h-24 object-cover" />
+            imageList.map((image, index) => (
+              <div key={index} className="text-center">
+                <img src={image.url} alt={`Uploaded ${index}`} className="w-24 h-24 object-cover" />
+                <p className="text-sm mt-2 break-all">{image.url}</p> {/* Display Public URL */}
+              </div>
             ))
           ) : (
             <p>No images found</p>
