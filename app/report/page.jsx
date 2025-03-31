@@ -168,19 +168,166 @@
 //     </div>
 //   );
 // }
+// "use client";
+
+// import { useState } from "react";
+// import { db, storage } from "../firebase";
+// import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
+// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+// export default function ReportItem() {
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     description: "",
+//     location: "",
+//     type: "",
+//     image: null,
+//     reporterName: "",
+//     reporterEmail: "",
+//     reporterPhone: "",
+//   });
+
+//   const [loading, setLoading] = useState(false);
+//   const [uploadProgress, setUploadProgress] = useState(0);
+//   const [uploadedUrl, setUploadedUrl] = useState("");
+
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   const handleImageChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       setFormData({ ...formData, image: file });
+//     }
+//   };
+
+//   const uploadImage = async (file, docId) => {
+//     if (!file) return null;
+
+//     const storageRef = ref(storage, `images/${docId}_${file.name}`);
+
+//     try {
+//       await uploadBytes(storageRef, file);
+//       const url = await getDownloadURL(storageRef);
+//       setUploadedUrl(url);
+//       return url;
+//     } catch (error) {
+//       console.error("Error uploading file:", error);
+//       return null;
+//     }
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!formData.name || !formData.description || !formData.location || !formData.reporterName || !formData.reporterEmail) {
+//       alert("Please fill in all required fields.");
+//       return;
+//     }
+
+//     setLoading(true);
+//     setUploadProgress(0);
+
+//     try {
+//       const docRef = await addDoc(collection(db, "reportedItems"), {
+//         name: formData.name,
+//         description: formData.description,
+//         location: formData.location,
+//         type: formData.type,
+//         reporterName: formData.reporterName,
+//         reporterEmail: formData.reporterEmail,
+//         reporterPhone: formData.reporterPhone || "", // Optional field
+//         imageUrl: "", // Placeholder
+//         timestamp: serverTimestamp(),
+//       });
+
+//       let imageUrl = "";
+
+//       if (formData.image) {
+//         imageUrl = await uploadImage(formData.image, docRef.id);
+//         if (imageUrl) {
+//           await updateDoc(doc(db, "reportedItems", docRef.id), { imageUrl });
+//         }
+//       }
+
+//       alert("Item reported successfully!");
+//       setFormData({
+//         name: "",
+//         description: "",
+//         location: "",
+//         type: "lost",
+//         image: null,
+//         reporterName: "",
+//         reporterEmail: "",
+//         reporterPhone: "",
+//       });
+//       setUploadProgress(0);
+//     } catch (error) {
+//       console.error("Error submitting form:", error);
+//       alert("Failed to submit. Try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-lg mx-auto p-6 bg-[#F5F5F5] rounded-lg mt-10 mb-10">
+//       <h1 className="text-2xl font-semibold text-center mb-4 text-gray-800 pb-10">
+//         Report an Item
+//       </h1>
+
+//       <form onSubmit={handleSubmit} className="space-y-4">
+//         <input type="text" name="name" placeholder="Item Name" value={formData.name} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+//         <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+//         <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+
+//         {/* Contact Information */}
+//         <input type="text" name="reporterName" placeholder="Your Name" value={formData.reporterName} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+//         <input type="email" name="reporterEmail" placeholder="Your Email" value={formData.reporterEmail} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+//         <input type="tel" name="reporterPhone" placeholder="Your Phone Number (Optional)" value={formData.reporterPhone} onChange={handleChange} className="w-full p-2 border rounded-md" />
+
+//         <div className="flex gap-4">
+//           <button type="button" onClick={() => setFormData({ ...formData, type: "lost" })} className={`w-full p-2 rounded-md ${formData.type === "lost" ? "bg-red-500 text-white" : "bg-gray-200"}`}>
+//             Lost Item
+//           </button>
+//           <button type="button" onClick={() => setFormData({ ...formData, type: "found" })} className={`w-full p-2 rounded-md ${formData.type === "found" ? "bg-green-500 text-white" : "bg-gray-200"}`}>
+//             Found Item
+//           </button>
+//         </div>
+
+//         <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border rounded-md" />
+//         {formData.image && <p className="text-sm text-gray-600">{formData.image.name}</p>}
+
+//         {uploadProgress > 0 && <p className="text-blue-600">Uploading... {uploadProgress.toFixed(0)}%</p>}
+
+//         <button type="submit" className="w-full bg-gray-900 text-white p-2 rounded-md hover:bg-orange-500 transition" disabled={loading}>
+//           {loading ? "Submitting..." : "Submit"}
+//         </button>
+
+//         {uploadedUrl && (
+//           <div className="mt-4">
+//             <p className="text-sm text-gray-600">Uploaded Image:</p>
+//             <img src={uploadedUrl} alt="Uploaded preview" className="w-full h-auto mt-2 rounded-md" />
+//           </div>
+//         )}
+//       </form>
+//     </div>
+//   );
+// }
 "use client";
 
 import { useState } from "react";
-import { db, storage } from "../firebase";
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "../firebase"; // Firebase Firestore
+import { collection, addDoc, updateDoc, serverTimestamp, doc } from "firebase/firestore";
+import { supabase } from "../supabase"; // Supabase client import
 
 export default function ReportItem() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     location: "",
-    type: "",
+    type: "lost",
     image: null,
     reporterName: "",
     reporterEmail: "",
@@ -188,13 +335,14 @@ export default function ReportItem() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadedUrl, setUploadedUrl] = useState("");
+  const [uploadedUrl, setUploadedUrl] = useState(""); // Store the uploaded image URL
 
+  // Handle form field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle image file change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -202,22 +350,34 @@ export default function ReportItem() {
     }
   };
 
-  const uploadImage = async (file, docId) => {
+  // Upload image to Supabase and return the public URL
+  const uploadImageToSupabase = async (file) => {
     if (!file) return null;
 
-    const storageRef = ref(storage, `images/${docId}_${file.name}`);
-
+    const fileName = `${Date.now()}_${file.name}`;
     try {
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      setUploadedUrl(url);
-      return url;
+      // Upload image to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from("lost-and-found-images")
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get the public URL of the uploaded image
+      const { publicURL, error: urlError } = supabase.storage
+        .from("lost-and-found-images")
+        .getPublicUrl(fileName);
+
+      if (urlError) throw urlError;
+
+      return publicURL;
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("Error uploading to Supabase:", error);
       return null;
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -227,9 +387,9 @@ export default function ReportItem() {
     }
 
     setLoading(true);
-    setUploadProgress(0);
 
     try {
+      // Create a new document in Firestore (without image URL initially)
       const docRef = await addDoc(collection(db, "reportedItems"), {
         name: formData.name,
         description: formData.description,
@@ -238,15 +398,17 @@ export default function ReportItem() {
         reporterName: formData.reporterName,
         reporterEmail: formData.reporterEmail,
         reporterPhone: formData.reporterPhone || "", // Optional field
-        imageUrl: "", // Placeholder
+        imageUrl: "", // Placeholder for now
         timestamp: serverTimestamp(),
       });
 
       let imageUrl = "";
 
+      // If there's an image, upload it to Supabase and get the URL
       if (formData.image) {
-        imageUrl = await uploadImage(formData.image, docRef.id);
+        imageUrl = await uploadImageToSupabase(formData.image);
         if (imageUrl) {
+          // Update Firestore document with the uploaded image URL
           await updateDoc(doc(db, "reportedItems", docRef.id), { imageUrl });
         }
       }
@@ -262,7 +424,6 @@ export default function ReportItem() {
         reporterEmail: "",
         reporterPhone: "",
       });
-      setUploadProgress(0);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit. Try again.");
@@ -278,30 +439,91 @@ export default function ReportItem() {
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input type="text" name="name" placeholder="Item Name" value={formData.name} onChange={handleChange} className="w-full p-2 border rounded-md" required />
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded-md" required />
-        <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+        <input
+          type="text"
+          name="name"
+          placeholder="Item Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+          required
+        />
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+          required
+        />
 
         {/* Contact Information */}
-        <input type="text" name="reporterName" placeholder="Your Name" value={formData.reporterName} onChange={handleChange} className="w-full p-2 border rounded-md" required />
-        <input type="email" name="reporterEmail" placeholder="Your Email" value={formData.reporterEmail} onChange={handleChange} className="w-full p-2 border rounded-md" required />
-        <input type="tel" name="reporterPhone" placeholder="Your Phone Number (Optional)" value={formData.reporterPhone} onChange={handleChange} className="w-full p-2 border rounded-md" />
+        <input
+          type="text"
+          name="reporterName"
+          placeholder="Your Name"
+          value={formData.reporterName}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+          required
+        />
+        <input
+          type="email"
+          name="reporterEmail"
+          placeholder="Your Email"
+          value={formData.reporterEmail}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+          required
+        />
+        <input
+          type="tel"
+          name="reporterPhone"
+          placeholder="Your Phone Number (Optional)"
+          value={formData.reporterPhone}
+          onChange={handleChange}
+          className="w-full p-2 border rounded-md"
+        />
 
         <div className="flex gap-4">
-          <button type="button" onClick={() => setFormData({ ...formData, type: "lost" })} className={`w-full p-2 rounded-md ${formData.type === "lost" ? "bg-red-500 text-white" : "bg-gray-200"}`}>
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, type: "lost" })}
+            className={`w-full p-2 rounded-md ${formData.type === "lost" ? "bg-red-500 text-white" : "bg-gray-200"}`}
+          >
             Lost Item
           </button>
-          <button type="button" onClick={() => setFormData({ ...formData, type: "found" })} className={`w-full p-2 rounded-md ${formData.type === "found" ? "bg-green-500 text-white" : "bg-gray-200"}`}>
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, type: "found" })}
+            className={`w-full p-2 rounded-md ${formData.type === "found" ? "bg-green-500 text-white" : "bg-gray-200"}`}
+          >
             Found Item
           </button>
         </div>
 
-        <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border rounded-md" />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="w-full p-2 border rounded-md"
+        />
         {formData.image && <p className="text-sm text-gray-600">{formData.image.name}</p>}
 
-        {uploadProgress > 0 && <p className="text-blue-600">Uploading... {uploadProgress.toFixed(0)}%</p>}
-
-        <button type="submit" className="w-full bg-gray-900 text-white p-2 rounded-md hover:bg-orange-500 transition" disabled={loading}>
+        <button
+          type="submit"
+          className="w-full bg-gray-900 text-white p-2 rounded-md hover:bg-orange-500 transition"
+          disabled={loading}
+        >
           {loading ? "Submitting..." : "Submit"}
         </button>
 
@@ -315,3 +537,4 @@ export default function ReportItem() {
     </div>
   );
 }
+
