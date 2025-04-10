@@ -49,7 +49,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6">
+    <div className="min-h-screen bg-white flex flex-col justify-center items-center px-2">
       {/* Hero Section */}
       <div className="max-w-4xl text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800">

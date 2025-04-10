@@ -132,6 +132,7 @@
 //     </div>
 //   );
 // }
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -252,3 +253,4 @@ export default function LostItems() {
     </div>
   );
 }
+

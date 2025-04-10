@@ -315,6 +315,233 @@
 //     </div>
 //   );
 // }
+// "use client";
+
+// import { useState } from "react";
+// import { db } from "../firebase"; // Firebase Firestore
+// import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+// import { supabase } from "../supabase"; // Supabase client import
+
+// export default function ReportItem() {
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     description: "",
+//     location: "",
+//     type: "lost",
+//     image: null,
+//     reporterName: "",
+//     reporterEmail: "",
+//     reporterPhone: "",
+//   });
+
+//   const [loading, setLoading] = useState(false);
+//   const [imageUrl, setImageUrl] = useState(""); // Store the uploaded image URL
+//   const [errorMessage, setErrorMessage] = useState(""); // For error handling
+
+//   // Handle form field changes
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   // Handle image file change
+//   const handleImageChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       setFormData({ ...formData, image: file });
+//     }
+//   };
+
+//   // Upload image to Supabase and return the public URL
+//   const uploadImageToSupabase = async (file) => {
+//     if (!file) return null;
+
+//     const fileName = `${Date.now()}_${file.name}`; // FIXED TEMPLATE LITERAL
+//     try {
+//       // Upload image to Supabase Storage
+//       const { error } = await supabase.storage.from("images").upload(fileName, file);
+
+//       if (error) {
+//         console.error("Error uploading to Supabase:", error);
+//         return null;
+//       }
+
+//       // Get the public URL of the uploaded image
+//       const { data } = supabase.storage.from("images").getPublicUrl(fileName);
+
+//       return data.publicUrl; // FIXED: Correctly return the URL
+//     } catch (error) {
+//       console.error("Unexpected error during image upload:", error);
+//       return null;
+//     }
+//   };
+
+//   // Handle form submission
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     // Validate required fields
+//     if (!formData.name || !formData.description || !formData.location || !formData.reporterName || !formData.reporterEmail) {
+//       alert("Please fill in all required fields.");
+//       return;
+//     }
+
+//     setLoading(true);
+//     let uploadedImageUrl = "";
+
+//     try {
+//       // If there's an image, upload it to Supabase and get the URL
+//       if (formData.image) {
+//         uploadedImageUrl = await uploadImageToSupabase(formData.image);
+//         if (!uploadedImageUrl) {
+//           setErrorMessage("Failed to upload image");
+//           setLoading(false);
+//           return;
+//         }
+//         setImageUrl(uploadedImageUrl); // Set the image URL after successful upload
+//       }
+
+//       // Create a new document in Firestore with the uploaded image URL
+//       await addDoc(collection(db, "reportedItems"), {
+//         name: formData.name,
+//         description: formData.description,
+//         location: formData.location,
+//         type: formData.type,
+//         reporterName: formData.reporterName,
+//         reporterEmail: formData.reporterEmail,
+//         reporterPhone: formData.reporterPhone || "", // Optional field
+//         imageUrl: uploadedImageUrl, // Store image URL if uploaded
+//         timestamp: serverTimestamp(),
+//       });
+
+//       alert("Item reported successfully!");
+//       // Reset form data after successful submission
+//       setFormData({
+//         name: "",
+//         description: "",
+//         location: "",
+//         type: "lost",
+//         image: null,
+//         reporterName: "",
+//         reporterEmail: "",
+//         reporterPhone: "",
+//       });
+//       setImageUrl(""); // Reset uploaded image
+//     } catch (error) {
+//       console.error("Error submitting form:", error);
+//       alert("Failed to submit. Try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-lg mx-auto p-6 bg-[#F5F5F5] rounded-lg mt-10 mb-10">
+//       <h1 className="text-2xl font-semibold text-center mb-4 text-gray-800 pb-10">
+//         Report an Item
+//       </h1>
+
+//       <form onSubmit={handleSubmit} className="space-y-4">
+//         <input
+//           type="text"
+//           name="name"
+//           placeholder="Item Name"
+//           value={formData.name}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//           required
+//         />
+//         <textarea
+//           name="description"
+//           placeholder="Description"
+//           value={formData.description}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//           required
+//         />
+//         <input
+//           type="text"
+//           name="location"
+//           placeholder="Location"
+//           value={formData.location}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//           required
+//         />
+
+//         {/* Contact Information */}
+//         <input
+//           type="text"
+//           name="reporterName"
+//           placeholder="Your Name"
+//           value={formData.reporterName}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//           required
+//         />
+//         <input
+//           type="email"
+//           name="reporterEmail"
+//           placeholder="Your Email"
+//           value={formData.reporterEmail}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//           required
+//         />
+//         <input
+//           type="tel"
+//           name="reporterPhone"
+//           placeholder="Your Phone Number (Optional)"
+//           value={formData.reporterPhone}
+//           onChange={handleChange}
+//           className="w-full p-2 border rounded-md"
+//         />
+
+//         {/* Fixed ClassNames for Buttons */}
+//         <div className="flex gap-4">
+//           <button
+//             type="button"
+//             onClick={() => setFormData({ ...formData, type: "lost" })}
+//             className={`w-full p-2 rounded-md ${formData.type === "lost" ? "bg-red-500 text-white" : "bg-gray-200"}`}
+//           >
+//             Lost Item
+//           </button>
+//           <button
+//             type="button"
+//             onClick={() => setFormData({ ...formData, type: "found" })}
+//             className={`w-full p-2 rounded-md ${formData.type === "found" ? "bg-green-500 text-white" : "bg-gray-200"}`}
+//           >
+//             Found Item
+//           </button>
+//         </div>
+
+//         <input
+//           type="file"
+//           accept="image/*"
+//           onChange={handleImageChange}
+//           className="w-full p-2 border rounded-md"
+//         />
+//         {formData.image && <p className="text-sm text-gray-600">{formData.image.name}</p>}
+
+//         <button
+//           type="submit"
+//           className="w-full bg-gray-900 text-white p-2 rounded-md hover:bg-orange-500 transition"
+//           disabled={loading}
+//         >
+//           {loading ? "Submitting..." : "Submit"}
+//         </button>
+
+//         {imageUrl && (
+//           <div className="mt-4">
+//             <p>Uploaded Image:</p>
+//             <img src={imageUrl} alt="Uploaded preview" className="w-full h-auto mt-2 rounded-md" />
+//           </div>
+//         )}
+
+//         {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+//       </form>
+//     </div>
+//   );
+// }
 "use client";
 
 import { useState } from "react";
@@ -355,20 +582,19 @@ export default function ReportItem() {
   const uploadImageToSupabase = async (file) => {
     if (!file) return null;
 
-    const fileName = `${Date.now()}_${file.name}`; // FIXED TEMPLATE LITERAL
+    const fileName = `${Date.now()}_${file.name}`;
+
     try {
-      // Upload image to Supabase Storage
-      const { error } = await supabase.storage.from("images").upload(fileName, file);
+      const { data, error } = await supabase.storage.from("images").upload(fileName, file);
 
       if (error) {
-        console.error("Error uploading to Supabase:", error);
+        console.error("Error uploading to Supabase:", error.message);
         return null;
       }
 
-      // Get the public URL of the uploaded image
-      const { data } = supabase.storage.from("images").getPublicUrl(fileName);
-
-      return data.publicUrl; // FIXED: Correctly return the URL
+      // Correctly retrieve the public URL
+      const { data: urlData } = supabase.storage.from("images").getPublicUrl(fileName);
+      return urlData.publicUrl;
     } catch (error) {
       console.error("Unexpected error during image upload:", error);
       return null;
@@ -379,28 +605,26 @@ export default function ReportItem() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.name || !formData.description || !formData.location || !formData.reporterName || !formData.reporterEmail) {
       alert("Please fill in all required fields.");
       return;
     }
 
     setLoading(true);
+    setErrorMessage(""); // Clear previous errors
     let uploadedImageUrl = "";
 
     try {
-      // If there's an image, upload it to Supabase and get the URL
       if (formData.image) {
         uploadedImageUrl = await uploadImageToSupabase(formData.image);
         if (!uploadedImageUrl) {
-          setErrorMessage("Failed to upload image");
+          setErrorMessage("Failed to upload image.");
           setLoading(false);
           return;
         }
-        setImageUrl(uploadedImageUrl); // Set the image URL after successful upload
+        setImageUrl(uploadedImageUrl); // Set image URL if successful
       }
 
-      // Create a new document in Firestore with the uploaded image URL
       await addDoc(collection(db, "reportedItems"), {
         name: formData.name,
         description: formData.description,
@@ -408,13 +632,14 @@ export default function ReportItem() {
         type: formData.type,
         reporterName: formData.reporterName,
         reporterEmail: formData.reporterEmail,
-        reporterPhone: formData.reporterPhone || "", // Optional field
-        imageUrl: uploadedImageUrl, // Store image URL if uploaded
+        reporterPhone: formData.reporterPhone || "",
+        imageUrl: uploadedImageUrl,
         timestamp: serverTimestamp(),
+        status: "pending", // Added default status field
       });
 
       alert("Item reported successfully!");
-      // Reset form data after successful submission
+
       setFormData({
         name: "",
         description: "",
@@ -425,7 +650,7 @@ export default function ReportItem() {
         reporterEmail: "",
         reporterPhone: "",
       });
-      setImageUrl(""); // Reset uploaded image
+      setImageUrl("");
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit. Try again.");

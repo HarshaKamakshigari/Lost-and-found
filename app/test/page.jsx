@@ -8,7 +8,7 @@ import { supabase } from "../supabase";
 export default function ImageUpload() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(""); // Public URL
+  const [imageUrl, setImageUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   // Handle file selection
@@ -42,7 +42,8 @@ export default function ImageUpload() {
     }
   };
 
-  // Upload to Firebase
+  
+
   const uploadImage = async () => {
     if (!file) return alert("Select a file first");
 
