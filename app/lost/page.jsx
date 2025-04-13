@@ -146,7 +146,7 @@ export default function LostItems() {
   const [sortOrder, setSortOrder] = useState("newest");
 
   useEffect(() => {
-    const q = query(collection(db, "reportedItems"), where("type", "==", "lost"));
+    const q = query(collection(db, "reportedItems"), where("type", "==", "lost"), where("status", "==", "approved"));
 
     const unsubscribe = onSnapshot(
       q,
