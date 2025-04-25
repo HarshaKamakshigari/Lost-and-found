@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.49.4",
     "browser-image-compression": "^2.0.2",
     "firebase": "^11.4.0",
+    "framer-motion": "^12.9.1",
     "next": "15.2.1",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
